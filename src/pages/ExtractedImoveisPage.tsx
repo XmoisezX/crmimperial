@@ -727,6 +727,7 @@ const ExtractedImoveisPage: React.FC = () => {
                                 <tr className="bg-gray-100 text-left sticky top-0 z-10">
                                     <th className="border border-gray-300 px-3 py-2 w-10 text-center">
                                         <Checkbox
+                                            id="select-all-checkbox"
                                             checked={data.length > 0 && data.every(row => selectedIds.has(row.id))}
                                             onCheckedChange={handleSelectAll}
                                         />
@@ -756,6 +757,7 @@ const ExtractedImoveisPage: React.FC = () => {
                                         <tr key={row.id} className={`hover:bg-gray-50 transition-colors ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`}>
                                             <td className="border border-gray-300 px-3 py-2 text-center">
                                                 <Checkbox
+                                                    id={`checkbox-row-${row.id}`}
                                                     checked={selectedIds.has(row.id)}
                                                     onCheckedChange={() => handleSelectRow(row.id)}
                                                 />
