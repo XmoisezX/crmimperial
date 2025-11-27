@@ -6,7 +6,7 @@ const SystemSettingsPage: React.FC = () => {
     return (
         <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-full">
             <h1 className="text-3xl font-bold text-dark-text mb-6">Configurações do Sistema</h1>
-            <p className="text-lg text-light-text mb-8">Gerencie as configurações globais da plataforma e do site.</p>
+            <p className="text-lg text-light-text mb-8">Gerencie as configurações globais da plataforma e do site. {/* v2.0 - 27/11/2025 */}</p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl">
                 <Link to="/crm/sistema/site" className="block p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200 border-t-4 border-blue-600">
