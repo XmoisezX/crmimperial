@@ -15,17 +15,17 @@ const SystemSettingsPage: React.FC = () => {
                     <p className="text-sm text-light-text mt-1">Gerencie banners, SEO e visibilidade pública.</p>
                 </Link>
 
+                <Link to="/crm/sistema/usuarios" className="block p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200 border-t-4 border-green-600">
+                    <Users className="w-8 h-8 text-green-600 mb-3" />
+                    <h2 className="text-xl font-semibold text-dark-text">Usuários e Permissões</h2>
+                    <p className="text-sm text-light-text mt-1">Gerenciamento de acesso e funções da equipe.</p>
+                </Link>
+
                 <div className="p-6 bg-white rounded-lg shadow-md border-t-4 border-gray-400 opacity-70">
                     <Settings className="w-8 h-8 text-gray-500 mb-3" />
                     <h2 className="text-xl font-semibold text-dark-text">Geral (Mock)</h2>
                     <p className="text-sm text-light-text mt-1">Configurações de moeda, fuso horário e integrações.</p>
                 </div>
-
-                <Link to="/crm/sistema/usuarios" className="block p-6 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200 border-t-4 border-blue-600">
-                    <Users className="w-8 h-8 text-blue-600 mb-3" />
-                    <h2 className="text-xl font-semibold text-dark-text">Usuários e Permissões</h2>
-                    <p className="text-sm text-light-text mt-1">Gerenciamento de acesso e funções da equipe.</p>
-                </Link>
             </div>
         </div>
     );
