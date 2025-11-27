@@ -3,6 +3,7 @@ import { Loader2, Search, Download, ChevronLeft, ChevronRight, Save, ArrowUp, Ar
 import { supabase } from '../integrations/supabase/client';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import { Checkbox } from '../components/ui/Checkbox';
 import { Card, CardContent } from '../components/ui/Card';
 import ExtractedImovelFilters, { ExtractedFilters } from '../components/ExtractedImovelFilters';
 import jsPDF from 'jspdf';
@@ -223,6 +224,7 @@ const ExtractedImoveisPage: React.FC = () => {
     const [limit, setLimit] = useState(20);
     const [fetchError, setFetchError] = useState<string | null>(null); // NOVO ESTADO DE ERRO
     const [isExporting, setIsExporting] = useState(false); // NOVO ESTADO DE EXPORTAÇÃO
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set()); // Estado para linhas selecionadas
 
     // --- Estado de Ordenação ---
     const [sortColumn, setSortColumn] = useState<string>('id');
@@ -398,6 +400,34 @@ const ExtractedImoveisPage: React.FC = () => {
         setPage(1); // Volta para a primeira página ao mudar a ordenação
     };
 
+    // 🔹 Handlers de Seleção
+    const handleSelectRow = (id: number) => {
+        setSelectedIds(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    };
+
+    const handleSelectAll = () => {
+        const allIdsOnPage = data.map(row => row.id);
+        const allSelected = allIdsOnPage.every(id => selectedIds.has(id));
+
+        setSelectedIds(prev => {
+            const newSet = new Set(prev);
+            if (allSelected) {
+                allIdsOnPage.forEach(id => newSet.delete(id));
+            } else {
+                allIdsOnPage.forEach(id => newSet.add(id));
+            }
+            return newSet;
+        });
+    };
+
 
     // 🔹 Salva célula individualmente ao perder o foco
     const handleSaveCell = async (id: number, field: string, rawValue: string) => {
@@ -438,7 +468,7 @@ const ExtractedImoveisPage: React.FC = () => {
         }
     };
 
-    // 🔹 Exportar CSV (TODOS os dados filtrados)
+    // 🔹 Exportar CSV (TODOS os dados filtrados ou SELECIONADOS)
     const exportCSV = useCallback(async () => {
         if (totalRows === 0) {
             alert("Nenhum dado para exportar.");
@@ -446,15 +476,34 @@ const ExtractedImoveisPage: React.FC = () => {
         }
         setIsExporting(true);
 
-        const allData = await fetchAllFilteredData(appliedFilters, search, sortColumn, sortDirection);
+        let dataToExport: ExtractedImovel[] = [];
 
-        if (allData.length === 0) {
+        if (selectedIds.size > 0) {
+            // Exportar apenas selecionados
+            const { data: selectedData, error } = await supabase
+                .from('imoveis_importados')
+                .select('*')
+                .in('id', Array.from(selectedIds));
+
+            if (error) {
+                console.error("Erro ao buscar dados selecionados:", error);
+                alert("Erro ao exportar dados selecionados.");
+                setIsExporting(false);
+                return;
+            }
+            dataToExport = selectedData as ExtractedImovel[];
+        } else {
+            // Exportar todos filtrados (comportamento original)
+            dataToExport = await fetchAllFilteredData(appliedFilters, search, sortColumn, sortDirection);
+        }
+
+        if (dataToExport.length === 0) {
             setIsExporting(false);
             return;
         }
 
         const header = columns.join(",");
-        const rows = allData
+        const rows = dataToExport
             .map((r) => columns.map((c) => {
                 return `"${r[c] ?? ""}"`;
             }).join(","))
@@ -465,13 +514,13 @@ const ExtractedImoveisPage: React.FC = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `imoveis_importados_filtrados_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `imoveis_importados_${selectedIds.size > 0 ? 'selecionados' : 'filtrados'}_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
 
         setIsExporting(false);
-    }, [appliedFilters, search, sortColumn, sortDirection, totalRows, fetchAllFilteredData, columns]);
+    }, [appliedFilters, search, sortColumn, sortDirection, totalRows, fetchAllFilteredData, columns, selectedIds]);
 
-    // 🔹 Exportar PDF (TODOS os dados filtrados)
+    // 🔹 Exportar PDF (TODOS os dados filtrados ou SELECIONADOS)
     const exportPDF = useCallback(async () => {
         if (totalRows === 0) {
             alert("Nenhum dado para exportar.");
@@ -479,9 +528,28 @@ const ExtractedImoveisPage: React.FC = () => {
         }
         setIsExporting(true);
 
-        const allData = await fetchAllFilteredData(appliedFilters, search, sortColumn, sortDirection);
+        let dataToExport: ExtractedImovel[] = [];
 
-        if (allData.length === 0) {
+        if (selectedIds.size > 0) {
+            // Exportar apenas selecionados
+            const { data: selectedData, error } = await supabase
+                .from('imoveis_importados')
+                .select('*')
+                .in('id', Array.from(selectedIds));
+
+            if (error) {
+                console.error("Erro ao buscar dados selecionados:", error);
+                alert("Erro ao exportar dados selecionados.");
+                setIsExporting(false);
+                return;
+            }
+            dataToExport = selectedData as ExtractedImovel[];
+        } else {
+            // Exportar todos filtrados (comportamento original)
+            dataToExport = await fetchAllFilteredData(appliedFilters, search, sortColumn, sortDirection);
+        }
+
+        if (dataToExport.length === 0) {
             setIsExporting(false);
             return;
         }
@@ -493,7 +561,7 @@ const ExtractedImoveisPage: React.FC = () => {
         });
 
         const head = [columns];
-        const body = allData.map(row => columns.map(col => {
+        const body = dataToExport.map(row => columns.map(col => {
             return row[col] ?? '';
         }));
 
@@ -515,15 +583,15 @@ const ExtractedImoveisPage: React.FC = () => {
             didDrawPage: function (data) {
                 // Adiciona título e número da página
                 doc.setFontSize(10);
-                doc.text("Relatório de Imóveis Importados", data.settings.margin.left, 5);
+                doc.text(`Relatório de Imóveis Importados (${selectedIds.size > 0 ? 'Selecionados' : 'Completo'})`, data.settings.margin.left, 5);
                 doc.text(`Página ${data.pageNumber}`, doc.internal.pageSize.width - data.settings.margin.right, 5, { align: 'right' });
             }
         });
 
-        doc.save(`imoveis_importados_filtrados_${new Date().toISOString().split('T')[0]}.pdf`);
+        doc.save(`imoveis_importados_${selectedIds.size > 0 ? 'selecionados' : 'filtrados'}_${new Date().toISOString().split('T')[0]}.pdf`);
 
         setIsExporting(false);
-    }, [appliedFilters, search, sortColumn, sortDirection, totalRows, fetchAllFilteredData, columns]);
+    }, [appliedFilters, search, sortColumn, sortDirection, totalRows, fetchAllFilteredData, columns, selectedIds]);
 
 
     const totalPages = Math.ceil(totalRows / limit);
@@ -616,11 +684,20 @@ const ExtractedImoveisPage: React.FC = () => {
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" /> {isExporting ? 'Exportando...' : 'Salvando...'}
                         </Button>
                     )}
+                    {selectedIds.size > 0 && (
+                        <Button
+                            onClick={() => setSelectedIds(new Set())}
+                            variant="outline"
+                            className="h-9 text-gray-600 border-gray-600 hover:bg-gray-50"
+                        >
+                            Limpar Seleção ({selectedIds.size})
+                        </Button>
+                    )}
                     <Button onClick={exportCSV} variant="outline" className="h-9 text-green-600 border-green-600 hover:bg-green-50" disabled={isExporting || saving || totalRows === 0}>
-                        <Download className="w-4 h-4 mr-2" /> Exportar CSV ({totalRows})
+                        <Download className="w-4 h-4 mr-2" /> {selectedIds.size > 0 ? `Exportar Selecionados (${selectedIds.size})` : `Exportar CSV (${totalRows})`}
                     </Button>
                     <Button onClick={exportPDF} variant="outline" className="h-9 text-red-600 border-red-600 hover:bg-red-50" disabled={isExporting || saving || totalRows === 0}>
-                        <Download className="w-4 h-4 mr-2" /> Exportar PDF ({totalRows})
+                        <Download className="w-4 h-4 mr-2" /> {selectedIds.size > 0 ? `Exportar Selecionados (${selectedIds.size})` : `Exportar PDF (${totalRows})`}
                     </Button>
                 </div>
             </div>
@@ -648,6 +725,12 @@ const ExtractedImoveisPage: React.FC = () => {
                         <table className="min-w-full text-sm border-collapse">
                             <thead>
                                 <tr className="bg-gray-100 text-left sticky top-0 z-10">
+                                    <th className="border border-gray-300 px-3 py-2 w-10 text-center">
+                                        <Checkbox
+                                            checked={data.length > 0 && data.every(row => selectedIds.has(row.id))}
+                                            onCheckedChange={handleSelectAll}
+                                        />
+                                    </th>
                                     {columns.map((col) => (
                                         <th
                                             key={col}
@@ -670,7 +753,13 @@ const ExtractedImoveisPage: React.FC = () => {
                             <tbody>
                                 {data.map((row) => {
                                     return (
-                                        <tr key={row.id} className={`hover:bg-gray-50 transition-colors`}>
+                                        <tr key={row.id} className={`hover:bg-gray-50 transition-colors ${selectedIds.has(row.id) ? 'bg-blue-50' : ''}`}>
+                                            <td className="border border-gray-300 px-3 py-2 text-center">
+                                                <Checkbox
+                                                    checked={selectedIds.has(row.id)}
+                                                    onCheckedChange={() => handleSelectRow(row.id)}
+                                                />
+                                            </td>
                                             {columns.map((col) => {
 
                                                 const currentValue = row[col] ?? '';
