@@ -34,7 +34,6 @@ const UsersPage: React.FC = () => {
         try {
             setLoading(true);
 
-            // Fetch roles
             const { data: rolesData, error: rolesError } = await supabase
                 .from('roles')
                 .select('*')
@@ -43,7 +42,6 @@ const UsersPage: React.FC = () => {
             if (rolesError) throw rolesError;
             setRoles(rolesData || []);
 
-            // Fetch profiles
             const { data: profilesData, error: profilesError } = await supabase
                 .from('profiles')
                 .select('*');
@@ -51,7 +49,6 @@ const UsersPage: React.FC = () => {
             if (profilesError) throw profilesError;
             setUsers(profilesData || []);
 
-            // Fetch user roles
             const { data: userRolesData, error: userRolesError } = await supabase
                 .from('user_roles')
                 .select('*');
@@ -61,7 +58,7 @@ const UsersPage: React.FC = () => {
 
         } catch (error) {
             console.error('Error fetching data:', error);
-            alert('Erro ao carregar dados de usuários');
+            showNotification('Erro ao carregar dados de usuários', 'error');
         } finally {
             setLoading(false);
         }
@@ -70,16 +67,13 @@ const UsersPage: React.FC = () => {
     const handleRoleToggle = async (userId: string, roleId: number, isChecked: boolean) => {
         try {
             if (isChecked) {
-                // Add role
                 const { error } = await supabase
                     .from('user_roles')
                     .insert({ user_id: userId, role_id: roleId });
 
                 if (error) throw error;
                 setUserRoles([...userRoles, { user_id: userId, role_id: roleId }]);
-                // alert('Permissão adicionada');
             } else {
-                // Remove role
                 const { error } = await supabase
                     .from('user_roles')
                     .delete()
@@ -87,31 +81,49 @@ const UsersPage: React.FC = () => {
 
                 if (error) throw error;
                 setUserRoles(userRoles.filter(ur => !(ur.user_id === userId && ur.role_id === roleId)));
-                // alert('Permissão removida');
             }
         } catch (error) {
             console.error('Error updating role:', error);
-            alert('Erro ao atualizar permissão');
+            showNotification('Erro ao atualizar permissão', 'error');
         }
     };
 
     const handleResetPassword = async (email: string | null) => {
         if (!email) {
-            alert('Email não disponível para este usuário');
+            showNotification('Email não disponível para este usuário', 'error');
             return;
         }
 
         try {
+            const redirectUrl = window.location.hostname === 'localhost'
+                ? `${window.location.origin}/update-password`
+                : `https://${window.location.hostname}/update-password`;
+
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/update-password`,
+                redirectTo: redirectUrl,
             });
 
             if (error) throw error;
-            alert(`Email de redefinição enviado para ${email}`);
+            showNotification(`✅ Email de redefinição enviado para ${email}`, 'success');
         } catch (error: any) {
             console.error('Error resetting password:', error);
-            alert(`Erro ao enviar email: ${error.message || 'Erro desconhecido'}`);
+            showNotification(`❌ Erro ao enviar email: ${error.message || 'Erro desconhecido'}`, 'error');
         }
+    };
+
+    const showNotification = (message: string, type: 'success' | 'error') => {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg text-white font-medium transition-all duration-300 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'
+            }`;
+        notification.textContent = message;
+        notification.style.animation = 'slideIn 0.3s ease-out';
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => notification.remove(), 300);
+        }, 4000);
     };
 
     const filteredUsers = users.filter(user =>
@@ -121,6 +133,17 @@ const UsersPage: React.FC = () => {
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
+            <style>{`
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `}</style>
+
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
