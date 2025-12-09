@@ -98,11 +98,11 @@ const ExtractedImovelFilters: React.FC<ExtractedImovelFiltersProps> = ({ filters
             {/* Linha 1: Busca de Endereço, Referência e Responsável */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <TextInput
-                    label="Buscar Endereço"
+                    label="Buscar Endereço / Proprietário"
                     id="enderecoSearch"
                     value={filters.enderecoSearch}
                     onChange={handleTextChange}
-                    placeholder="Endereço..."
+                    placeholder="Endereço ou Nome..."
                 />
                 <TextInput
                     label="Buscar Referência"
