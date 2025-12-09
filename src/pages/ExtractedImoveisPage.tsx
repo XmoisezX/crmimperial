@@ -51,7 +51,8 @@ const initialFilters: ExtractedFilters = {
     categoria: '',
     andar: null,
     enderecoSearch: '',
-    referenciaSearch: '', // NOVO FILTRO
+    referenciaSearch: '',
+    responsavel: '', // NOVO FILTRO
 };
 
 // Função auxiliar para formatar texto para moeda (R$ 999.999,99)
@@ -302,6 +303,7 @@ const ExtractedImoveisPage: React.FC = () => {
                 p_sort_column: sortCol, // Novo parâmetro
                 p_sort_direction: sortDir, // Novo parâmetro
                 p_referencia_search: currentFilters.referenciaSearch.trim() || null, // NOVO PARÂMETRO
+                p_responsavel: currentFilters.responsavel || null, // NOVO PARÂMETRO
             });
 
             if (error) {
@@ -351,6 +353,7 @@ const ExtractedImoveisPage: React.FC = () => {
                 p_sort_column: sortCol,
                 p_sort_direction: sortDir,
                 p_referencia_search: currentFilters.referenciaSearch.trim() || null,
+                p_responsavel: currentFilters.responsavel || null, // NOVO PARÂMETRO
             });
 
             if (error) {
@@ -600,7 +603,7 @@ const ExtractedImoveisPage: React.FC = () => {
     const paginationSummary = `Página ${page} de ${totalPages} — ${totalRows} registros`;
 
     // O resumo da filtragem agora é sempre baseado no totalRows retornado pelo servidor
-    const filterSummary = (appliedFilters.categoria || appliedFilters.bairro || appliedFilters.minDorms || appliedFilters.maxDorms || appliedFilters.minVenda || appliedFilters.maxVenda || appliedFilters.minAluguel || appliedFilters.maxAluguel || appliedFilters.andar || appliedFilters.enderecoSearch || appliedFilters.referenciaSearch || search)
+    const filterSummary = (appliedFilters.categoria || appliedFilters.bairro || appliedFilters.minDorms || appliedFilters.maxDorms || appliedFilters.minVenda || appliedFilters.maxVenda || appliedFilters.minAluguel || appliedFilters.maxAluguel || appliedFilters.andar || appliedFilters.enderecoSearch || appliedFilters.referenciaSearch || appliedFilters.responsavel || search)
         ? ` (Filtrando ${totalRows} resultados)`
         : '';
 

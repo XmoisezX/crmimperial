@@ -6,9 +6,9 @@ import NumberInput from './NumberInput';
 
 // Mock Data baseado nas colunas da tabela imoveis_importados
 const CATEGORY_OPTIONS = [
-    'Apartamento', 
-    'Casa', 
-    'Terreno', 
+    'Apartamento',
+    'Casa',
+    'Terreno',
     'Chácara',
     'Cobertura',
     'Depósito',
@@ -45,8 +45,11 @@ export interface ExtractedFilters {
     categoria: string;
     andar: number | null;
     enderecoSearch: string;
-    referenciaSearch: string; // NOVO CAMPO
+    referenciaSearch: string;
+    responsavel: string; // NOVO CAMPO
 }
+
+const RESPONSAVEL_OPTIONS = ['Vazio', 'Alessandro Gomes', 'Tamires Torres', 'Moisez Torres', 'Elias Torres'];
 
 interface ExtractedImovelFiltersProps {
     filters: ExtractedFilters;
@@ -56,7 +59,7 @@ interface ExtractedImovelFiltersProps {
 }
 
 const ExtractedImovelFilters: React.FC<ExtractedImovelFiltersProps> = ({ filters, onFilterChange, onApply, onClear }) => {
-    
+
     const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
         // Para valores de moeda, usamos a lógica de limpeza
@@ -69,10 +72,10 @@ const ExtractedImovelFilters: React.FC<ExtractedImovelFiltersProps> = ({ filters
             onFilterChange(id as keyof ExtractedFilters, numericValue);
         }
     };
-    
+
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { id, value } = e.target;
-        
+
         if (id === 'andar') {
             const numericValue = value === '' ? null : parseInt(value);
             onFilterChange(id as keyof ExtractedFilters, numericValue);
@@ -80,7 +83,7 @@ const ExtractedImovelFilters: React.FC<ExtractedImovelFiltersProps> = ({ filters
             onFilterChange(id as keyof ExtractedFilters, value);
         }
     };
-    
+
     const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
         onFilterChange(id as keyof ExtractedFilters, value);
@@ -92,37 +95,44 @@ const ExtractedImovelFilters: React.FC<ExtractedImovelFiltersProps> = ({ filters
                 <Search className="w-5 h-5 mr-2 text-blue-600" /> Filtro Inteligente
             </h2>
 
-            {/* Linha 1: Busca de Endereço e Referência */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <TextInput 
-                    label="Buscar Endereço Específico" 
-                    id="enderecoSearch" 
-                    value={filters.enderecoSearch} 
-                    onChange={handleTextChange} 
-                    placeholder="Ex: Rua Suzana Cortez Balreira 391"
+            {/* Linha 1: Busca de Endereço, Referência e Responsável */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <TextInput
+                    label="Buscar Endereço"
+                    id="enderecoSearch"
+                    value={filters.enderecoSearch}
+                    onChange={handleTextChange}
+                    placeholder="Endereço..."
                 />
-                <TextInput 
-                    label="Buscar Referência" 
-                    id="referenciaSearch" 
-                    value={filters.referenciaSearch} 
-                    onChange={handleTextChange} 
-                    placeholder="Ex: REF12345"
+                <TextInput
+                    label="Buscar Referência"
+                    id="referenciaSearch"
+                    value={filters.referenciaSearch}
+                    onChange={handleTextChange}
+                    placeholder="REF..."
                 />
+                <div className="space-y-1">
+                    <label htmlFor="responsavel" className="block text-xs font-medium text-light-text">Responsável</label>
+                    <select id="responsavel" value={filters.responsavel || ''} onChange={handleSelectChange} className="w-full p-2 border border-gray-300 rounded-md text-sm text-light-text disabled:bg-gray-100">
+                        <option value="">Todos</option>
+                        {RESPONSAVEL_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                    </select>
+                </div>
             </div>
 
             {/* Linha 2: Valores e Categorias (4 colunas em telas grandes) */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 pt-3 border-t border-gray-100">
-                
+
                 {/* Valor Venda Mín */}
                 <NumberInput label="Venda Mín" id="minVenda" value={filters.minVenda || ''} onChange={handleNumberChange} isCurrency placeholder="0" />
                 {/* Valor Venda Máx */}
                 <NumberInput label="Venda Máx" id="maxVenda" value={filters.maxVenda || ''} onChange={handleNumberChange} isCurrency placeholder="Máx" />
-                
+
                 {/* Valor Aluguel Mín */}
                 <NumberInput label="Aluguel Mín" id="minAluguel" value={filters.minAluguel || ''} onChange={handleNumberChange} isCurrency placeholder="0" />
                 {/* Valor Aluguel Máx */}
                 <NumberInput label="Aluguel Máx" id="maxAluguel" value={filters.maxAluguel || ''} onChange={handleNumberChange} isCurrency placeholder="Máx" />
-                
+
                 {/* Categoria */}
                 <div className="space-y-1">
                     <label htmlFor="categoria" className="block text-xs font-medium text-light-text">Categoria</label>
@@ -131,7 +141,7 @@ const ExtractedImovelFilters: React.FC<ExtractedImovelFiltersProps> = ({ filters
                         {CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                 </div>
-                
+
                 {/* Bairro */}
                 <div className="space-y-1">
                     <label htmlFor="bairro" className="block text-xs font-medium text-light-text">Bairro</label>
@@ -140,7 +150,7 @@ const ExtractedImovelFilters: React.FC<ExtractedImovelFiltersProps> = ({ filters
                         {NEIGHBORHOOD_OPTIONS.map(b => <option key={b} value={b}>{b}</option>)}
                     </select>
                 </div>
-                
+
                 {/* Andar */}
                 <div className="space-y-1">
                     <label htmlFor="andar" className="block text-xs font-medium text-light-text">Andar</label>
@@ -153,22 +163,22 @@ const ExtractedImovelFilters: React.FC<ExtractedImovelFiltersProps> = ({ filters
 
             {/* Linha 3: Características (4 colunas em telas grandes) */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 pt-3 border-t border-gray-100">
-                
+
                 {/* Dormitórios Mín */}
                 <NumberInput label="Dorms Mín" id="minDorms" value={filters.minDorms || ''} onChange={handleNumberChange} placeholder="0" />
                 {/* Dormitórios Máx */}
                 <NumberInput label="Dorms Máx" id="maxDorms" value={filters.maxDorms || ''} onChange={handleNumberChange} placeholder="Máx" />
-                
+
                 {/* Suítes Mín (Mock) */}
                 <NumberInput label="Suítes Mín" id="minSuites" value={filters.minSuites || ''} onChange={handleNumberChange} placeholder="0" />
                 {/* Suítes Máx (Mock) */}
                 <NumberInput label="Suítes Máx" id="maxSuites" value={filters.maxSuites || ''} onChange={handleNumberChange} placeholder="Máx" />
-                
+
                 {/* Vagas Mín (Mock) */}
                 <NumberInput label="Vagas Mín" id="minVagas" value={filters.minVagas || ''} onChange={handleNumberChange} placeholder="0" />
                 {/* Vagas Máx (Mock) */}
                 <NumberInput label="Vagas Máx" id="maxVagas" value={filters.maxVagas || ''} onChange={handleNumberChange} placeholder="Máx" />
-                
+
                 {/* Espaço para botões de ação */}
                 <div className="col-span-2 flex space-x-2 pt-6">
                     <Button onClick={onClear} variant="outline" className="w-full text-gray-700 border-gray-300 hover:bg-gray-100">
