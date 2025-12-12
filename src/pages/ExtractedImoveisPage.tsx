@@ -437,6 +437,7 @@ const ExtractedImoveisPage: React.FC = () => {
 
     // 🔹 Salva célula individualmente ao perder o foco
     const handleSaveCell = async (id: number, field: string, rawValue: string) => {
+        console.log('🔍 handleSaveCell chamado:', { id, field, rawValue }); // DEBUG
 
         let updatedValue: any = rawValue;
 
@@ -449,6 +450,8 @@ const ExtractedImoveisPage: React.FC = () => {
             updatedValue = rawValue.trim() === '' ? null : rawValue;
         }
 
+        console.log('💾 Valor a ser salvo:', { field, updatedValue }); // DEBUG
+
         // 1. Atualiza o estado 'data' imediatamente para refletir a mudança na UI
         setData(prev => prev.map(item =>
             item.id === id ? { ...item, [field]: updatedValue } : item
@@ -458,6 +461,7 @@ const ExtractedImoveisPage: React.FC = () => {
         setSaving(true);
 
         const dataToUpdate: Partial<ExtractedImovel> = { [field]: updatedValue };
+        console.log('📤 Enviando para Supabase:', { id, dataToUpdate }); // DEBUG
 
         const { error } = await supabase
             .from("imoveis_importados")
@@ -467,10 +471,12 @@ const ExtractedImoveisPage: React.FC = () => {
         setSaving(false);
 
         if (error) {
-            console.error("Erro ao salvar célula:", error);
+            console.error("❌ Erro ao salvar célula:", error);
             alert(`Falha ao salvar a alteração: ${error.message}`);
             // Opcional: Recarregar dados para reverter a célula em caso de erro
             fetchData(page, appliedFilters, search, sortColumn, sortDirection);
+        } else {
+            console.log('✅ Salvo com sucesso!'); // DEBUG
         }
     };
 
