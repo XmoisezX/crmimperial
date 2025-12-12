@@ -465,7 +465,7 @@ const ExtractedImoveisPage: React.FC = () => {
         // Se o nome da coluna no DB for diferente do frontend, adicione aqui
         const columnMapping: Record<string, string> = {
             'Responsáveis': 'Responsáveis',
-            'Feedback': 'Feedback', // ⚠️ No DB é "Feedback" com F maiúsculo
+            'Feedback': 'feedback', // ⚠️ Forçando lowercase para garantir que salva no Postgres padrão
             'Referencia': 'Referencia',
             'Categoria': 'Categoria',
             'Endereco': 'Endereco',
