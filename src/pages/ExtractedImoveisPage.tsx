@@ -315,6 +315,7 @@ const ExtractedImoveisPage: React.FC = () => {
                 setTotalRows(0);
                 setData([]);
             } else if (fetchedData && fetchedData.length > 0) {
+                console.log("🔍 Dados recebidos do RPC (primeira linha):", fetchedData[0]); // DEBUG: Ver chaves retornadas
                 const totalCount = fetchedData[0].total_count;
                 setTotalRows(Number(totalCount));
                 setData(fetchedData as ExtractedImovel[]);
