@@ -14,7 +14,7 @@ import { formatCurrencyHalfTone, parseCurrencyToNumber } from '../utils/format';
 interface ExtractedImovel {
     id: number; // Internal Supabase row ID (SERIAL PRIMARY KEY)
     "Responsáveis": 'Vazio' | 'Alessandro Gomes' | 'Tamires Torres' | 'Moisez Torres' | 'Elias Torres' | string | null; // NOVO: ENUM
-    feedback: string | null; // NOVO: Coluna de feedback
+    Feedback: string | null; // NOVO: Coluna de feedback
     Referencia: string | null;
     Categoria: string | null;
     Endereco: string | null;
@@ -238,7 +238,7 @@ const ExtractedImoveisPage: React.FC = () => {
 
     const columns = [
         "Responsáveis",
-        "feedback",
+        "Feedback",
         "Referencia",
         "Categoria",
         "Endereco",
@@ -263,7 +263,7 @@ const ExtractedImoveisPage: React.FC = () => {
     // Larguras mínimas ajustadas
     const columnWidths: Record<string, string> = {
         "Responsáveis": "120px",
-        "feedback": "180px",
+        "Feedback": "180px",
         "Endereco": "180px",
         "NomeProprietario": "150px",
         "Referencia": "120px",
@@ -464,7 +464,7 @@ const ExtractedImoveisPage: React.FC = () => {
         // Se o nome da coluna no DB for diferente do frontend, adicione aqui
         const columnMapping: Record<string, string> = {
             'Responsáveis': 'Responsáveis',
-            'feedback': 'Feedback', // ⚠️ No DB é "Feedback" com F maiúsculo
+            'Feedback': 'Feedback', // ⚠️ No DB é "Feedback" com F maiúsculo
             'Referencia': 'Referencia',
             'Categoria': 'Categoria',
             'Endereco': 'Endereco',
