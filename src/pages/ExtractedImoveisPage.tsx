@@ -460,8 +460,33 @@ const ExtractedImoveisPage: React.FC = () => {
         // 2. Salva no banco de dados
         setSaving(true);
 
-        const dataToUpdate: Partial<ExtractedImovel> = { [field]: updatedValue };
-        console.log('📤 Enviando para Supabase:', { id, dataToUpdate }); // DEBUG
+        // Mapeamento de nomes de colunas (frontend -> database)
+        // Se o nome da coluna no DB for diferente do frontend, adicione aqui
+        const columnMapping: Record<string, string> = {
+            'Responsáveis': 'Responsáveis',
+            'feedback': 'Feedback', // ⚠️ No DB é "Feedback" com F maiúsculo
+            'Referencia': 'Referencia',
+            'Categoria': 'Categoria',
+            'Endereco': 'Endereco',
+            'Bairro': 'Bairro',
+            'AreaTotal': 'AreaTotal',
+            'AreaPrivada': 'AreaPrivada',
+            'Dorms': 'Dorms',
+            'Suites': 'Suites',
+            'Vagas': 'Vagas',
+            'Venda': 'Venda',
+            'Aluguel': 'Aluguel',
+            'NomeProprietario': 'NomeProprietario',
+            'Fones': 'Fones',
+            'Email': 'Email',
+            'Exclusivo': 'Exclusivo',
+            'ID': 'ID',
+        };
+
+        const dbColumnName = columnMapping[field] || field;
+        const dataToUpdate: Record<string, any> = { [dbColumnName]: updatedValue };
+
+        console.log('📤 Enviando para Supabase:', { id, field, dbColumnName, dataToUpdate }); // DEBUG
 
         const { error } = await supabase
             .from("imoveis_importados")
